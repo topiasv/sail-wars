@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=CastleWars
+Exec=CastleWars
+Name=CastleWars
+# translation example:
+# your app name in German locale (de)
+Name[de]=CastleWars
+
