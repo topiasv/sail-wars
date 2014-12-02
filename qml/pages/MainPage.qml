@@ -31,57 +31,49 @@
 import QtQuick 2.0
 //import QtQuick.Controls 1.0
 import Sailfish.Silica 1.0
-import "../content/logic.js" as Logic
+//import "../content/logic.js" as Logic
 //import QtSvg 5.3
 
 
 Page {
     id: page
 
-    property bool passedSplash
-    property int castle: 30
-    property int fence: 10
-    property int bricks: 5
-    property int builders: 2
-    property int weapons: 5
-    property int soldiers: 2
-    property int crystals: 5
-    property int wizards: 2
-
     function rand(from, to) {
         return Math.floor(Math.random() * (to - from + 1) + from);
     }
+
+    states: [
+        State {
+            name: "gameOn"
+            PropertyChanges { target: castleimg; y: 480; visible: true }
+            PropertyChanges { target: build; visible: true }
+            PropertyChanges { target: attack; visible: true }
+            PropertyChanges { target: magic; visible: true }
+            PropertyChanges { target: health; visible: true }
+            PropertyChanges { target: menu; visible: false }
+            PropertyChanges { target: title; visible: false }
+            StateChangeScript { script: console.log("state = gameOn") }
+        },
+
+        State {
+            name: "gameOver"
+            PropertyChanges { target: castleimg; visible: false }
+            PropertyChanges { target: build; visible: false }
+            PropertyChanges { target: attack; visible: false }
+            PropertyChanges { target: magic; visible: false }
+            PropertyChanges { target: health; visible: false }
+            PropertyChanges { target: menu; visible: true }
+            PropertyChanges { target: title; visible: true }
+            StateChangeScript { script: console.log("state = gameOver") }
+        }
+
+    ]
 
     /*Image {
         id: background
         source:"../content/gfx/background.png"
         anchors.fill:parent
     }*/
-
-    states: [
-        State {
-            name: "gameOn"
-            when: Logic.gameState.gameOver === false
-            PropertyChanges { target: castleimg; y: 480; visible: true }
-            PropertyChanges { target: build; visible: true }
-            PropertyChanges { target: attack; visible: true }
-            PropertyChanges { target: magic; visible: true }
-            PropertyChanges { target: health; visible: true }
-            StateChangeScript { script: console.log("state = gameOn") }
-        },
-
-        State {
-            name: "gameOver"
-            when: Logic.gameState.gameOver === true
-            PropertyChanges { target: castleimg; visible: false }
-            PropertyChanges { target: build; visible: false }
-            PropertyChanges { target: attack; visible: false }
-            PropertyChanges { target: magic; visible: false }
-            PropertyChanges { target: health; visible: false }
-            StateChangeScript { script: console.log("state = gameOver") }
-        }
-
-    ]
 
     FontLoader {
         id: primaryFont
@@ -104,11 +96,29 @@ Page {
         }
     }
 
+    Repeater {
+        model: 4
+        delegate: Image {
+            id: cloud2
+            source:"../content/gfx/cloud.png"
+            transform: Rotation { axis { x: 0; y: 1; z: 0 } angle: 180 }
+            y: rand(50,200)
+
+            NumberAnimation on x {
+                 id: cloudAnimation2
+                 loops: Animation.Infinite
+                 from: -512
+                 to: 668
+                 duration: rand(20000,40000) + rand(0,10000)
+            }
+        }
+    }
+
     Image {
         id: castleimg
         source: "../content/gfx/castle-blue.png"
         x: parent.width/2 - 310/2
-        y: parent.height - ground.height - castle * 5 - 36
+        y: parent.height - ground.height - game.castle * 5 - 36
         visible: false
     }
 
@@ -123,24 +133,6 @@ Page {
                  id: cloudAnimation
                  loops: Animation.Infinite
                  from: -128
-                 to: 668
-                 duration: rand(20000,40000) + rand(0,10000)
-            }
-        }
-    }
-
-    Repeater {
-        model: 4
-        delegate: Image {
-            id: cloud2
-            source:"../content/gfx/cloud.png"
-            transform: Rotation { axis { x: 0; y: 1; z: 0 } angle: 180 }
-            y: rand(50,200)
-
-            NumberAnimation on x {
-                 id: cloudAnimation2
-                 loops: Animation.Infinite
-                 from: -512
                  to: 668
                  duration: rand(20000,40000) + rand(0,10000)
             }
@@ -206,7 +198,7 @@ Page {
         MouseArea {
             anchors.fill: parent
             onClicked:
-                castle += 5
+                game.buildCastle(5)
         }
     }
 
@@ -234,7 +226,7 @@ Page {
         MouseArea {
             anchors.fill: parent
             onClicked:
-                Logic.health.castle -= 5
+                game.attack(5)
         }
     }
 
@@ -270,7 +262,7 @@ Page {
         radius: 20
 
         Text {
-            text: parent.castle
+            text: "" + game.castle
             anchors.centerIn: parent
         }
     }
@@ -292,15 +284,12 @@ Page {
         MouseArea {
             anchors.fill: parent
             onClicked:
-                if(startMenu.visible == true)
-                    startMenu.visible = false
-                else
-                    startMenu.visible = true
+                action.toggleMenu()
         }
     }
 
     Rectangle {
-        id: startMenu
+        id: menu
 
         width: 300
         height: 300
@@ -321,22 +310,106 @@ Page {
         Column {
             anchors.horizontalCenter: parent.Center
             Text {
-                anchors.horizontalCenter: startMenu.Center
+                anchors.horizontalCenter: mMenu.Center
                 text: "Menu"
                 font.family: secondaryFont.name
             }
 
             Button {
                 text: "New Game"
-                onClicked: { console.log(Logic.startGame()); startMenu.visible = false; title.visible = false; page.state = "gameOn"; }
-                anchors.horizontalCenter: startMenu.Center
+                onClicked: { action.startGame() }
+                anchors.horizontalCenter: mMenu.Center
             }
+        }
+    }
 
-            Button {
-                text: "Close"
-                onClicked: { console.log(Logic.getGameState()); }
-                anchors.horizontalCenter: startMenu.Center
+
+    QtObject {
+        id: game
+        property var builders
+        property var bricks
+        property var soldiers
+        property var weapons
+        property var sorcerers
+        property var crystals
+        property var castle
+        property var fence
+
+        function attack(attack) {
+            /*game.fence -= attack
+            if (game.fence <= 0) {
+                var nextAttack = abs(game.fence)
+                game.fence = 0
+                game.castle -= nextAttack
+                castleimg.y -= nextAttack * 5
+                if (game.castle <= 0) {
+                    action.endGame()
+                }
+            }*/
+            game.castle -= attack
+            if (game.castle < 0) {
+                action.endGame()
             }
+            castleimg.y = parent.height - ground.height - game.castle * 5 - 36
+        }
+
+        function buildCastle(build) {
+
+            game.castle += build
+
+            if (game.castle > 100) {
+                action.endGame()
+            }
+            castleimg.y = parent.height - ground.height - game.castle * 5 - 36
+        }
+
+        function buildWall() {
+
+        }
+
+        function recruit() {
+
+        }
+
+        function school() {
+
+        }
+
+        function sorcerer() {
+
+        }
+    }
+
+    QtObject {
+        id: action
+
+        function startGame() {
+            page.state = "gameOn"
+            game.builders = 2
+            game.bricks = 5
+            game.soldiers = 2
+            game.weapons = 5
+            game.sorcerers = 2
+            game.crystals = 5
+            game.castle = 30
+            game.fence = 10
+
+            castleimg.y = page.height - ground.height - game.castle * 5 - 36
+        }
+
+        function endGame() {
+            page.state = "gameOver"
+        }
+
+        function turn() {
+
+        }
+
+        function toggleMenu() {
+            if(menu.visible == true)
+                menu.visible = false
+            else
+                menu.visible = true
         }
     }
 }
