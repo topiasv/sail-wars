@@ -38,6 +38,8 @@ import Sailfish.Silica 1.0
 Page {
     id: page
 
+    property var  globalMargins: page.height * 0.01
+
     function rand(from, to) {
         return Math.floor(Math.random() * (to - from + 1) + from);
     }
@@ -143,16 +145,38 @@ Page {
         id: ground
         anchors.bottom: parent.bottom
         width: parent.width
-        height: parent.height * 0.25
+        height: parent.height * 0.24
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#5fdb50" }
             GradientStop { position: 1.0; color: "#228f1d" }
+        }
+
+        Image {
+            id: deck
+            height: parent.height * 0.85
+            fillMode: Image.PreserveAspectFit
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.horizontalCenter
+            anchors.margins: parent.height * 0.01
+            smooth: true
+            source: "../content/cards/BlueBack.png"
+        }
+
+        Image {
+            id: played
+            height: parent.height * 0.85
+            fillMode: Image.PreserveAspectFit
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.horizontalCenter
+            anchors.margins: parent.height * 0.01
+            smooth: true
+            source: "../content/cards/Dragon.png"
         }
     }
 
     Rectangle {
         id: grass
-        anchors.top: sky.bottom
+        anchors.bottom: ground.top
         width: parent.width
         height: parent.height * 0.01
         color: "#006600"
@@ -174,96 +198,307 @@ Page {
         }
     }
 
-    Rectangle {
-        id: build
-        width: 100
-        height: 100
-        anchors.left: parent.left
-        anchors.leftMargin: 10
+   Row {
+        id: stats
+        property var statBoxWidth: page.width * 0.23
+        property var statBoxHeight: page.height * 0.10
+
         anchors.top: parent.top
-        anchors.topMargin: 10
-        visible: false
-
-        color: "#fe7756"
-        border.color: "#a90101"
-        border.width: 10
-        radius: 20
-
-        Image {
-            id: brick
-            source: "../content/gfx/brick.png"
-            anchors.centerIn: parent
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked:
-                game.buildCastle(5)
-        }
-    }
-
-    Rectangle {
-        id: attack
-        width: 100
-        height: 100
         anchors.left: parent.left
-        anchors.leftMargin: 10
-        anchors.top: build.bottom
-        anchors.topMargin: 10
-        visible: false
+        anchors.margins: globalMargins
 
-        color: "#66ff57"
-        border.color: "#006600"
-        border.width: 10
-        radius: 20
-
-        Image {
-            id: weapon
-            source: "../content/gfx/weapon.png"
-            anchors.centerIn: parent
+        spacing: globalMargins
+        
+        Rectangle {
+            id: build
+            width: parent.statBoxWidth
+            height: parent.statBoxHeight
+            anchors { top: page.top; left: page.left }
+            anchors.margins: globalMargins
+            visible: false
+    
+            color: "#fe7756"
+            border.color: "#a90101"
+            border.width: globalMargins
+            radius: 20
+            
+            Grid {
+                anchors.fill: parent
+                anchors.margins: parent.border.width
+                columns: 2
+                rows: 2
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: tools
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/brick.png"
+                    }
+                }
+                
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: builders
+                        text: game.builders
+                        anchors.centerIn: parent
+                    }
+                }
+            
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: brick
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/brick.png"
+                    }
+                }
+            
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: bricks
+                        text: game.bricks
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked:
+                    game.buildCastle(5)
+            }
         }
+    
+        Rectangle {
+            id: attack
+            width: parent.statBoxWidth
+            height: parent.statBoxHeight
+            anchors { top: page.top; left: build.right }
+            anchors.margins: globalMargins
+            visible: false
+    
+            color: "#66ff57"
+            border.color: "#006600"
+            border.width: globalMargins
+            radius: 20
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked:
-                game.attack(5)
+            Grid {
+                anchors.fill: parent
+                anchors.margins: parent.border.width
+                columns: 2
+                rows: 2
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: helmet
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/weapon.png"
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: soldiers
+                        text: game.soldiers
+                        anchors.centerIn: parent
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: weapon
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/weapon.png"
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: weapons
+                        text: game.weapons
+                        anchors.centerIn: parent
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked:
+                        game.attack(5)
+                }
+            }
         }
-    }
+    
+        Rectangle {
+            id: magic
+            width: parent.statBoxWidth
+            height: parent.statBoxHeight
+            anchors { top: page.top; left: attack.right }
+            anchors.margins: globalMargins
+            anchors.topMargin: globalMargins
+            visible: false
+    
+            color: "#02b3fd"
+            border.color: "#003399"
+            border.width: globalMargins
+            radius: 20
 
-    Rectangle {
-        id: magic
-        width: 100
-        height: 100
-        anchors.left: parent.left
-        anchors.leftMargin: 10
-        anchors.top: attack.bottom
-        anchors.topMargin: 10
-        visible: false
+            Grid {
+                anchors.fill: parent
+                anchors.margins: parent.border.width
+                columns: 2
+                rows: 2
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: wand
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/crystal.png"
+                    }
+                }
 
-        color: "#02b3fd"
-        border.color: "#003399"
-        border.width: 10
-        radius: 20
-    }
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: sorcerers
+                        text: game.sorcerers
+                        anchors.top: wand.bottom
+                        anchors.centerIn: parent
+                    }
+                }
 
-    Rectangle {
-        id: health
-        width: 100
-        height: 100
-        anchors.left: parent.left
-        anchors.leftMargin: 10
-        anchors.top: magic.bottom
-        anchors.topMargin: 10
-        visible: false
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: crystal
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/crystal.png"
+                    }
+                }
 
-        color: "#666666"
-        border.color: "#000000"
-        border.width: 10
-        radius: 20
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: crystals
+                        text: game.crystals
+                        anchors.centerIn: parent
+                    }
+                }
+            }
 
-        Text {
-            text: "" + game.castle
-            anchors.centerIn: parent
+
+    
+
+    
+
+    
+
+        }
+    
+        Rectangle {
+            id: health
+            width: parent.statBoxWidth
+            height: parent.statBoxHeight
+            anchors { top: page.top; left: magic.right }
+            anchors.margins: globalMargins
+            anchors.topMargin: globalMargins
+            visible: false
+    
+            color: "#666666"
+            border.color: "#000000"
+            border.width: globalMargins
+            radius: 20
+            Grid {
+                anchors.fill: parent
+                anchors.margins: parent.border.width
+                columns: 2
+                rows: 2
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: fort
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/crystal.png"
+                    }
+                }
+    
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: castle
+                        anchors.centerIn: parent
+                        text: game.castle
+                    }
+                }
+    
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Image {
+                        id: wall
+                        anchors.centerIn: parent
+                        height: parent.height * 0.9
+                        fillMode: Image.PreserveAspectFit
+                        source: "../content/gfx/crystal.png"
+                    }
+                }
+    
+                Rectangle {
+                    width: parent.width / parent.columns
+                    height: parent.height / parent.rows
+                    color: "#000000ff"
+                    Text {
+                        id: fence
+                        anchors.centerIn: parent
+                        text: game.fence
+                    }
+                }
+            }
         }
     }
 
@@ -272,19 +507,52 @@ Page {
         width: 75
         height: 75
         anchors.right: parent.right
-        anchors.rightMargin: 10
-        anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.rightMargin: globalMargins
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: globalMargins
 
         color: "#d8a26b"
         border.color: "#cc8c38"
-        border.width: 10
+        border.width: globalMargins
         radius: 20
 
         MouseArea {
             anchors.fill: parent
             onClicked:
                 action.toggleMenu()
+        }
+
+        Rectangle {
+            id: line1
+            width: parent.width - 40
+            height: 5
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            color: "#ffffff"
+        }
+
+        Rectangle {
+            id: line2
+            width: parent.width - 40
+            height: 5
+            anchors.top: line1.bottom
+            anchors.topMargin: globalMargins
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            color: "#ffffff"
+        }
+
+        Rectangle {
+            id: line3
+            width: parent.width - 40
+            height: 5
+            anchors.top: line2.bottom
+            anchors.topMargin: globalMargins
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            color: "#ffffff"
         }
     }
 
@@ -295,7 +563,7 @@ Page {
         height: 300
         color: "#d8a26b"
         border.color: "#cc8c38"
-        border.width: 10
+        border.width: globalMargins
         radius: 20
         anchors.centerIn: parent
         visible: true
@@ -308,17 +576,47 @@ Page {
         }
 
         Column {
-            anchors.horizontalCenter: parent.Center
+            anchors.fill: parent
+
             Text {
-                anchors.horizontalCenter: mMenu.Center
+                id: menuTitle
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 15
                 text: "Menu"
+                font.pointSize: 32
                 font.family: secondaryFont.name
             }
 
-            Button {
-                text: "New Game"
-                onClicked: { action.startGame() }
-                anchors.horizontalCenter: mMenu.Center
+            Rectangle {
+                id: newgameButton
+                width: parent.width - 60
+                height: parent.height/5
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: menuTitle.bottom
+                anchors.topMargin: globalMargins
+                anchors.leftMargin: 30
+                color: "#cc8c38"
+                border.width: globalMargins
+                border.color: "#cc8c38"
+                radius: 20
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked:
+                        action.startGame()
+                    onPressed:
+                        newgameButton.color = "white"
+                    onReleased:
+                        newgameButton.color = "#cc8c38"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "New Game"
+                    font.pointSize: 28
+                    font.family: secondaryFont.name
+                }
             }
         }
     }
@@ -334,6 +632,10 @@ Page {
         property var crystals
         property var castle
         property var fence
+
+        function getBuilders() {
+            return builders;
+        }
 
         function attack(attack) {
             /*game.fence -= attack
