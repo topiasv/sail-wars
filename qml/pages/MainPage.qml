@@ -48,10 +48,8 @@ Page {
         State {
             name: "gameOn"
             PropertyChanges { target: castleimg; y: 480; visible: true }
-            PropertyChanges { target: build; visible: true }
-            PropertyChanges { target: attack; visible: true }
-            PropertyChanges { target: magic; visible: true }
-            PropertyChanges { target: health; visible: true }
+            PropertyChanges { target: wall; visible: true }
+            PropertyChanges { target: stats; visible: true }
             PropertyChanges { target: menu; visible: false }
             PropertyChanges { target: title; visible: false }
             StateChangeScript { script: console.log("state = gameOn") }
@@ -60,10 +58,8 @@ Page {
         State {
             name: "gameOver"
             PropertyChanges { target: castleimg; visible: false }
-            PropertyChanges { target: build; visible: false }
-            PropertyChanges { target: attack; visible: false }
-            PropertyChanges { target: magic; visible: false }
-            PropertyChanges { target: health; visible: false }
+            PropertyChanges { target: wall; visible: false }
+            PropertyChanges { target: stats; visible: false }
             PropertyChanges { target: menu; visible: true }
             PropertyChanges { target: title; visible: true }
             StateChangeScript { script: console.log("state = gameOver") }
@@ -117,10 +113,18 @@ Page {
     }
 
     Image {
+        id: wall
+        source: "../content/gfx/wall.png"
+        x: page.width - castleimg.width / 4 + wall.width / 2
+        y: page.height - ground.height - grass.height + game.fence * 5
+        visible: false
+    }
+
+    Image {
         id: castleimg
         source: "../content/gfx/castle-blue.png"
-        x: parent.width/2 - 310/2
-        y: parent.height - ground.height - game.castle * 5 - 36
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: parent.height - ground.height - grass.height - game.castle * 5 - 36
         visible: false
     }
 
@@ -200,12 +204,13 @@ Page {
 
    Row {
         id: stats
-        property var statBoxWidth: page.width * 0.23
+        property var statBoxWidth: page.width * 0.227
         property var statBoxHeight: page.height * 0.10
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.margins: globalMargins
+        visible: false
 
         spacing: globalMargins
         
@@ -213,9 +218,6 @@ Page {
             id: build
             width: parent.statBoxWidth
             height: parent.statBoxHeight
-            anchors { top: page.top; left: page.left }
-            anchors.margins: globalMargins
-            visible: false
     
             color: "#fe7756"
             border.color: "#a90101"
@@ -232,7 +234,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: tools
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -245,7 +246,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: builders
                         text: game.builders
                         anchors.centerIn: parent
                     }
@@ -256,7 +256,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: brick
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -269,7 +268,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: bricks
                         text: game.bricks
                         anchors.centerIn: parent
                     }
@@ -286,10 +284,6 @@ Page {
             id: attack
             width: parent.statBoxWidth
             height: parent.statBoxHeight
-            anchors { top: page.top; left: build.right }
-            anchors.margins: globalMargins
-            visible: false
-    
             color: "#66ff57"
             border.color: "#006600"
             border.width: globalMargins
@@ -305,7 +299,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: helmet
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -318,7 +311,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: soldiers
                         text: game.soldiers
                         anchors.centerIn: parent
                     }
@@ -329,7 +321,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: weapon
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -342,16 +333,15 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: weapons
                         text: game.weapons
                         anchors.centerIn: parent
                     }
                 }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked:
-                        game.attack(5)
-                }
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked:
+                    game.attack(5)
             }
         }
     
@@ -359,10 +349,6 @@ Page {
             id: magic
             width: parent.statBoxWidth
             height: parent.statBoxHeight
-            anchors { top: page.top; left: attack.right }
-            anchors.margins: globalMargins
-            anchors.topMargin: globalMargins
-            visible: false
     
             color: "#02b3fd"
             border.color: "#003399"
@@ -379,7 +365,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: wand
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -392,9 +377,7 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: sorcerers
                         text: game.sorcerers
-                        anchors.top: wand.bottom
                         anchors.centerIn: parent
                     }
                 }
@@ -404,7 +387,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: crystal
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -417,30 +399,23 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: crystals
                         text: game.crystals
                         anchors.centerIn: parent
                     }
                 }
             }
 
-
-    
-
-    
-
-    
-
+            MouseArea {
+                anchors.fill: parent
+                onClicked:
+                    game.buildWall(-5)
+            }
         }
     
         Rectangle {
             id: health
             width: parent.statBoxWidth
             height: parent.statBoxHeight
-            anchors { top: page.top; left: magic.right }
-            anchors.margins: globalMargins
-            anchors.topMargin: globalMargins
-            visible: false
     
             color: "#666666"
             border.color: "#000000"
@@ -456,7 +431,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: fort
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -469,7 +443,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: castle
                         anchors.centerIn: parent
                         text: game.castle
                     }
@@ -480,7 +453,6 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Image {
-                        id: wall
                         anchors.centerIn: parent
                         height: parent.height * 0.9
                         fillMode: Image.PreserveAspectFit
@@ -493,11 +465,15 @@ Page {
                     height: parent.height / parent.rows
                     color: "#000000ff"
                     Text {
-                        id: fence
                         anchors.centerIn: parent
-                        text: game.fence
+                        text: game.wall
                     }
                 }
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked:
+                    game.buildWall(+1)
             }
         }
     }
@@ -575,9 +551,6 @@ Page {
             duration: 3000
         }
 
-        Column {
-            anchors.fill: parent
-
             Text {
                 id: menuTitle
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -618,55 +591,62 @@ Page {
                     font.family: secondaryFont.name
                 }
             }
-        }
+
     }
 
 
     QtObject {
         id: game
-        property var builders
-        property var bricks
-        property var soldiers
-        property var weapons
-        property var sorcerers
-        property var crystals
-        property var castle
-        property var fence
+        property int builders
+        property int bricks
+        property int soldiers
+        property int weapons
+        property int sorcerers
+        property int crystals
+        property int castle
+        property int wall
 
         function getBuilders() {
             return builders;
         }
 
         function attack(attack) {
-            /*game.fence -= attack
-            if (game.fence <= 0) {
-                var nextAttack = abs(game.fence)
+
+            if ((game.fence - attack) > 0) {
+                game.fence -= attack
+                wall.y += attack * 5
+            } else if ((game.fence - attack) <= 0) {
+                var nextAttack = attack - game.fence
                 game.fence = 0
                 game.castle -= nextAttack
-                castleimg.y -= nextAttack * 5
+                wall.y = page.height - ground.height - grass.height + game.fence * 5
+                castleimg.y += nextAttack * 5
                 if (game.castle <= 0) {
                     action.endGame()
                 }
-            }*/
-            game.castle -= attack
-            if (game.castle < 0) {
-                action.endGame()
             }
-            castleimg.y = parent.height - ground.height - game.castle * 5 - 36
+
+            else {
+                game.fence -= attack
+                wall.y += attack * 5
+                castleimg.y += attack * 5
+            }
         }
 
         function buildCastle(build) {
-
             game.castle += build
 
-            if (game.castle > 100) {
+            if (game.castle >= 100) {
                 action.endGame()
             }
-            castleimg.y = parent.height - ground.height - game.castle * 5 - 36
+            castleimg.y -= build * 5
         }
 
-        function buildWall() {
-
+        function buildWall(build) {
+            if (game.fence < 200) {
+                game.fence += build
+                wall.y -= build * 5
+            }
         }
 
         function recruit() {
@@ -696,7 +676,8 @@ Page {
             game.castle = 30
             game.fence = 10
 
-            castleimg.y = page.height - ground.height - game.castle * 5 - 36
+            castleimg.y = page.height - ground.height - grass.height - game.castle * 5 - 36
+            wall.y = page.height - ground.height - grass.height - game.fence * 5
         }
 
         function endGame() {
@@ -704,7 +685,6 @@ Page {
         }
 
         function turn() {
-
         }
 
         function toggleMenu() {

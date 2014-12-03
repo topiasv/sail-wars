@@ -30,7 +30,8 @@ OTHER_FILES += qml/CastleWars.qml \
     qml/content/logic.js \
     qml/content/gfx/castle-red.png \
     qml/content/gfx/castle-blue.png \
-    qml/pages/MainPage.qml
+    qml/pages/MainPage.qml \
+    qml/pages/Deck.qml
 
 # to disable building translations every time, comment out the
 # following CONFIG line
