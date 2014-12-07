@@ -45,6 +45,18 @@ Page {
         return Math.floor(Math.random() * (to - from + 1) + from);
     }
 
+    FontLoader {
+        id: primaryFont
+        name: Georgia
+    }
+
+    FontLoader {
+        id: secondaryFont
+        source: "../content/fonts/MTCORSVA.TTF"
+    }
+
+    /*****************STATES*****************/
+
     states: [
         State {
             name: "gameOn"
@@ -68,52 +80,40 @@ Page {
 
     ]
 
-    /*Image {
-        id: background
-        source:"../content/gfx/background.png"
-        anchors.fill:parent
-    }*/
-
-    FontLoader {
-        id: primaryFont
-        name: Georgia
-    }
-
-    FontLoader {
-        id: secondaryFont
-        source: "../content/fonts/MTCORSVA.TTF"
-    }
-
-    Image {
-        id: deck
-        height: parent.height * 0.85
-        fillMode: Image.PreserveAspectFit
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.horizontalCenter
-        anchors.margins: parent.height * 0.01
-        smooth: true
-        source: "../content/cards/BlueBack.png"
-    }
-
-    Image {
-        id: played
-        height: parent.height * 0.85
-        fillMode: Image.PreserveAspectFit
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.horizontalCenter
-        anchors.margins: parent.height * 0.01
-        smooth: true
-        source: "../content/cards/Dragon.png"
-    }
+    /**************BACKGROUNDS***************/
 
     Rectangle {
         id: sky
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#55b6ec" }
-            GradientStop { position: 1.0; color: "#3382cb" }
+            GradientStop { position: 0.0; color: "#3382cb" }
+            GradientStop { position: 1.0; color: "#55b6ec" }
         }
     }
+
+    Rectangle {
+        id: ground
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: parent.height * 0.24
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#5fdb50" }
+            GradientStop { position: 1.0; color: "#228f1d" }
+        }
+    }
+
+    Rectangle {
+        id: grass
+        anchors.bottom: ground.top
+        width: parent.width
+        height: parent.height * 0.01
+        z: 1000
+        color: "#006600"
+    }
+
+    /*************PLAYER GRAPHICS************/
+
+    /*****************MODELS*****************/
 
     ListModel {
         id: castleModel
@@ -121,33 +121,27 @@ Page {
         Component.onCompleted: {
             castleModel.append({castleSource: "../content/gfx/castle-blue.png",
                                 wallPosX: page.width * 0.875,
-                                statModel: blueStatModel})
+                                statModel: blueStatModel,
+                                player: blue.name,
+                                cloudRotation: 0,
+                                cloudStart: -page.width*0.95,
+                                cloudEnd: page.width*2.24,
+                                cloudY1: 0,
+                                cloudY2: page.height * 0.20,
+                                deckPic: "../content/cards/BlueBack.png",
+                                lastPlayed: blue.lastPlayed
+            })
             castleModel.append({castleSource: "../content/gfx/castle-red.png",
                                 wallPosX: page.width * 0.125,
-                                statModel: redStatModel})
-        }
-    }
-
-    ListModel {
-        id: statBoxModel
-        dynamicRoles: true
-        Component.onCompleted: {
-
-            statBoxModel.append ({
-                baseColor: "#fe7756",
-                borderColor: "#a90101",
-            })
-            statBoxModel.append ({
-                baseColor: "#66ff57",
-                borderColor: "#006600"
-            })
-            statBoxModel.append ({
-                baseColor: "#02b3fd",
-                borderColor: "#003399"
-            })
-            statBoxModel.append ({
-                baseColor: "#666666",
-                borderColor: "#000000"
+                                statModel: redStatModel,
+                                player: red.name,
+                                cloudRotation: 1,
+                                cloudStart: -page.width*1.24,
+                                cloudEnd: page.width*1.24,
+                                cloudY1: page.height * 0.10,
+                                cloudY2: page.height * 0.30,
+                                deckPic: "../content/cards/RedBack.png",
+                                lastPlayed: red.lastPlayed
             })
         }
     }
@@ -192,67 +186,6 @@ Page {
         }
     }
 
-
-/*
-    ListModel {
-        id: statsGridModel
-        dynamicRoles: true
-        Component.onCompleted: {
-            //blue stats
-
-            statsGridModel.append ({
-                firstImg: "../content/gfx/brick.png",
-                firstStat: blue.builder,
-                secondImg: "../content/gfx/brick.png",
-                secondStat: blue.bricks
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/weapon.png",
-                firstStat: blue.soldiers,
-                secondImg: "../content/gfx/weapon.png",
-                secondStat: blue.weapons
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/crystal.png",
-                firstStat: blue.sorcerers,
-                secondImg: "../content/gfx/crystal.png",
-                secondStat: blue.crystals
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/brick.png",
-                firstStat: blue.castle,
-                secondImg: "../content/gfx/brick.png",
-                secondStat: blue.fence
-            })
-            //red stats
-
-            statsGridModel.append ({
-                firstImg: "../content/gfx/brick.png",
-                firstStat: red.builder,
-                secondImg: "../content/gfx/brick.png",
-                secondStat: red.bricks
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/weapon.png",
-                firstStat: red.soldiers,
-                secondImg: "../content/gfx/weapon.png",
-                secondStat: red.weapons
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/crystal.png",
-                firstStat: red.sorcerers,
-                secondImg: "../content/gfx/crystal.png",
-                secondStat: red.crystals
-            })
-            statsGridModel.append ({
-                firstImg: "../content/gfx/brick.png",
-                firstStat: red.castle,
-                secondImg: "../content/gfx/brick.png",
-                secondStat: red.fence
-            })
-        }
-    }*/
-
     ListModel {
         id: redStatModel
         dynamicRoles: true
@@ -261,38 +194,39 @@ Page {
             redStatModel.append ({
                 baseColor: "#fe7756",
                 borderColor: "#a90101",
-                                        firstImg: "../content/gfx/brick.png",
-                                        firstStat: red.builders,
-                                        secondImg: "../content/gfx/brick.png",
-                                        secondStat: red.bricks
+                firstImg: "../content/gfx/brick.png",
+                firstStat: red.builders,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: red.bricks
             })
             redStatModel.append ({
                 baseColor: "#66ff57",
                 borderColor: "#006600",
-                                        firstImg: "../content/gfx/weapon.png",
-                                        firstStat: red.soldiers,
-                                        secondImg: "../content/gfx/weapon.png",
-                                        secondStat: red.weapons
+                firstImg: "../content/gfx/weapon.png",
+                firstStat: red.soldiers,
+                secondImg: "../content/gfx/weapon.png",
+                secondStat: red.weapons
             })
             redStatModel.append ({
                 baseColor: "#02b3fd",
                 borderColor: "#003399",
-                                        firstImg: "../content/gfx/crystal.png",
-                                        firstStat: red.sorcerers,
-                                        secondImg: "../content/gfx/crystal.png",
-                                        secondStat: red.crystals
+                firstImg: "../content/gfx/crystal.png",
+                firstStat: red.sorcerers,
+                secondImg: "../content/gfx/crystal.png",
+                secondStat: red.crystals
             })
             redStatModel.append ({
                 baseColor: "#666666",
                 borderColor: "#000000",
-                                        firstImg: "../content/gfx/brick.png",
-                                        firstStat: red.castle,
-                                        secondImg: "../content/gfx/brick.png",
-                                        secondStat: red.fence
+                firstImg: "../content/gfx/brick.png",
+                firstStat: red.castle,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: red.fence
             })
         }
     }
 
+    /******************VIEWS*****************/
 
     ListView {
         width: parent.width
@@ -323,15 +257,98 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: page.height * 0.725
                 fillMode: Image.PreserveAspectFit
-                y: parent.height - ground.height - grass.height - 30 * 5 - 36
+                y: parent.height - ground.height - grass.height - 100 * 5 - 36 // 30 * 5
+                z: 100
                 visible: true
+            }
+
+
+            Repeater {
+                model: 4
+                delegate: Image {
+                    id: cloud
+                    source:"../content/gfx/cloud.png"
+                    transform: Rotation { axis { x: 0; y: cloudRotation; z: 0 } angle: 180 }
+                    y: rand(cloudY1,cloudY2)
+
+                    NumberAnimation on x {
+                         id: cloudAnimation
+                         loops: Animation.Infinite
+                         from: cloudStart
+                         to: cloudEnd
+                         duration: rand(30000,50000) + rand(0,10000)
+                    }
+                }
+            }
+
+            Rectangle {
+                id: cards
+                y: ground.y
+                width: ground.width
+                height: ground.height
+                z: 1000
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#5fdb50" }
+                    GradientStop { position: 1.0; color: "#228f1d" }
+                }
+
+                Image {
+                    id: deck
+                    height: parent.height * 0.85
+                    fillMode: Image.PreserveAspectFit
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.horizontalCenter
+                    anchors.margins: parent.height * 0.01
+                    smooth: true
+                    source: deckPic
+                }
+
+                Image {
+                    id: played
+                    height: parent.height * 0.85
+                    fillMode: Image.PreserveAspectFit
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.horizontalCenter
+                    anchors.margins: parent.height * 0.01
+                    smooth: true
+                    source: lastPlayed
+                }
+            }
+
+            Rectangle {
+                id: turn
+                color: "red"
+                width: parent.width * 0.20
+                height: parent.height * 0.005
+                y: nameShadow.height - page.height * 0.005
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                id: nameShadow
+                text: player
+                x: playerName.x + page.height * 0.003
+                y: playerName.y + page.height * 0.003
+                font.pointSize: 32
+                font.family: secondaryFont.name
+            }
+
+            Text {
+                id: playerName
+                text: player
+                color: "white"
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pointSize: 32
+                font.family: secondaryFont.name
             }
 
             Row {
 
-                anchors.top: parent.top
+                anchors.top: turn.bottom
                 anchors.left: parent.left
                 anchors.margins: globalMargins
+                z: 1000
                 spacing: globalMargins
                 width: page.width
                 height: page.height * 0.10 + globalMargins
@@ -343,60 +360,60 @@ Page {
                     Rectangle {
                         width: page.width * 0.227
                         height: page.height * 0.10
-
+                        z: 1000
                         color: baseColor
                         border.color: borderColor
                         border.width: globalMargins
                         radius: 20
                         Grid {
-                             anchors.fill: parent
-                             anchors.margins: globalMargins
-                             columns: 2
-                             rows: 2
+                            anchors.fill: parent
+                            anchors.margins: globalMargins
+                            columns: 2
+                            rows: 2
+
+                            Rectangle {
+                                width: page.width * 0.227 / 2 - globalMargins
+                                height: page.height * 0.10 / 2 - globalMargins
+                                color: "#000000ff"
+                                Image {
+                                    anchors.centerIn: parent
+                                    height: parent.height * 0.9
+                                    fillMode: Image.PreserveAspectFit
+                                    source: firstImg
+                                }
+                            }
+
+                            Rectangle {
+                                width: page.width * 0.227 / 2 - globalMargins
+                                height: page.height * 0.10 / 2 - globalMargins
+                                color: "#000000ff"
+                                Text {
+                                    text: firstStat
+                                    anchors.centerIn: parent
+                                }
+                            }
 
                              Rectangle {
-                                 width: page.width * 0.227 / 2 - globalMargins
-                                 height: page.height * 0.10 / 2 - globalMargins
-                                 color: "#000000ff"
-                                 Image {
-                                     anchors.centerIn: parent
-                                     height: parent.height * 0.9
-                                     fillMode: Image.PreserveAspectFit
-                                     source: firstImg
-                                 }
-                             }
+                                width: page.width * 0.227 / 2 - globalMargins
+                                height: page.height * 0.10 / 2 - globalMargins
+                                color: "#000000ff"
+                                Image {
+                                    anchors.centerIn: parent
+                                    height: parent.height * 0.9
+                                    fillMode: Image.PreserveAspectFit
+                                    source: secondImg
+                                }
+                            }
 
-                             Rectangle {
-                                 width: page.width * 0.227 / 2 - globalMargins
-                                 height: page.height * 0.10 / 2 - globalMargins
-                                 color: "#000000ff"
-                                 Text {
-                                     text: firstStat
-                                     anchors.centerIn: parent
-                                 }
-                             }
-
-                             Rectangle {
-                                 width: page.width * 0.227 / 2 - globalMargins
-                                 height: page.height * 0.10 / 2 - globalMargins
-                                 color: "#000000ff"
-                                 Image {
-                                     anchors.centerIn: parent
-                                     height: parent.height * 0.9
-                                     fillMode: Image.PreserveAspectFit
-                                     source: secondImg
-                                 }
-                             }
-
-                             Rectangle {
-                                 width: page.width * 0.227 / 2 - globalMargins
-                                 height: page.height * 0.10 / 2 - globalMargins
-                                 color: "#000000ff"
-                                 Text {
+                            Rectangle {
+                                width: page.width * 0.227 / 2 - globalMargins
+                                height: page.height * 0.10 / 2 - globalMargins
+                                color: "#000000ff"
+                                Text {
                                      text: secondStat
                                      anchors.centerIn: parent
-                                 }
-                             }
+                                }
+                            }
                         }
                     }
                 }
@@ -404,25 +421,7 @@ Page {
         }
     }
 
-
-    Rectangle {
-        id: ground
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: parent.height * 0.24
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: "#5fdb50" }
-            GradientStop { position: 1.0; color: "#228f1d" }
-        }
-    }
-
-    Rectangle {
-        id: grass
-        anchors.bottom: ground.top
-        width: parent.width
-        height: parent.height * 0.01
-        color: "#006600"
-    }
+    /******************MENU******************/
 
     Image {
         id: title
@@ -442,8 +441,8 @@ Page {
 
     Rectangle {
         id: menuButton
-        width: 75
-        height: 75
+        width: page.width * 0.14
+        height: width
         anchors.right: parent.right
         anchors.rightMargin: globalMargins
         anchors.bottom: parent.bottom
@@ -469,7 +468,7 @@ Page {
             delegate:
                 Rectangle {
                     width: parent.width
-                    height: 5
+                    height: menuButton.height / 15
                     color: "#ffffff"
                 }
             }
@@ -539,8 +538,13 @@ Page {
     }
 
 
+    /*********GAME DATA & FUNCTIONS**********/
+
     QtObject {
         id: blue
+        property string name: "Blue"
+        property string lastPlayed: "../content/cards/Dragon.png"
+
         property int builders: 2
         property int bricks: 5
         property int soldiers: 2
@@ -553,6 +557,9 @@ Page {
 
     QtObject {
         id: red
+        property string name: "Red"
+        property string lastPlayed: "../content/cards/Banshee.png"
+
         property int builders: 2
         property int bricks: 5
         property int soldiers: 2
