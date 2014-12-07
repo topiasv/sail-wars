@@ -38,7 +38,8 @@ import Sailfish.Silica 1.0
 Page {
     id: page
 
-    property var  globalMargins: page.height * 0.01
+    property var globalMargins: page.height * 0.01
+    property var castle
 
     function rand(from, to) {
         return Math.floor(Math.random() * (to - from + 1) + from);
@@ -83,67 +84,326 @@ Page {
         source: "../content/fonts/MTCORSVA.TTF"
     }
 
+    Image {
+        id: deck
+        height: parent.height * 0.85
+        fillMode: Image.PreserveAspectFit
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.horizontalCenter
+        anchors.margins: parent.height * 0.01
+        smooth: true
+        source: "../content/cards/BlueBack.png"
+    }
+
+    Image {
+        id: played
+        height: parent.height * 0.85
+        fillMode: Image.PreserveAspectFit
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.horizontalCenter
+        anchors.margins: parent.height * 0.01
+        smooth: true
+        source: "../content/cards/Dragon.png"
+    }
+
     Rectangle {
         id: sky
-        anchors.top: parent.top
-        width: parent.width
-        height: parent.height * 0.75
+        anchors.fill: parent
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#55b6ec" }
             GradientStop { position: 1.0; color: "#3382cb" }
         }
     }
 
-    Repeater {
-        model: 4
-        delegate: Image {
-            id: cloud2
-            source:"../content/gfx/cloud.png"
-            transform: Rotation { axis { x: 0; y: 1; z: 0 } angle: 180 }
-            y: rand(50,200)
+    ListModel {
+        id: castleModel
+        dynamicRoles: true
+        Component.onCompleted: {
+            castleModel.append({castleSource: "../content/gfx/castle-blue.png",
+                                wallPosX: page.width * 0.875,
+                                statModel: blueStatModel})
+            castleModel.append({castleSource: "../content/gfx/castle-red.png",
+                                wallPosX: page.width * 0.125,
+                                statModel: redStatModel})
+        }
+    }
 
-            NumberAnimation on x {
-                 id: cloudAnimation2
-                 loops: Animation.Infinite
-                 from: -512
-                 to: 668
-                 duration: rand(20000,40000) + rand(0,10000)
+    ListModel {
+        id: statBoxModel
+        dynamicRoles: true
+        Component.onCompleted: {
+
+            statBoxModel.append ({
+                baseColor: "#fe7756",
+                borderColor: "#a90101",
+            })
+            statBoxModel.append ({
+                baseColor: "#66ff57",
+                borderColor: "#006600"
+            })
+            statBoxModel.append ({
+                baseColor: "#02b3fd",
+                borderColor: "#003399"
+            })
+            statBoxModel.append ({
+                baseColor: "#666666",
+                borderColor: "#000000"
+            })
+        }
+    }
+
+    ListModel {
+        id: blueStatModel
+        dynamicRoles: true
+        Component.onCompleted: {
+
+            blueStatModel.append ({
+                baseColor: "#fe7756",
+                borderColor: "#a90101",
+                firstImg: "../content/gfx/brick.png",
+                firstStat: blue.builders,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: blue.bricks
+            })
+            blueStatModel.append ({
+                baseColor: "#66ff57",
+                borderColor: "#006600",
+                firstImg: "../content/gfx/weapon.png",
+                firstStat: blue.soldiers,
+                secondImg: "../content/gfx/weapon.png",
+                secondStat: blue.weapons
+            })
+            blueStatModel.append ({
+                baseColor: "#02b3fd",
+                borderColor: "#003399",
+                firstImg: "../content/gfx/crystal.png",
+                firstStat: blue.sorcerers,
+                secondImg: "../content/gfx/crystal.png",
+                secondStat: blue.crystals
+            })
+            blueStatModel.append ({
+                baseColor: "#666666",
+                borderColor: "#000000",
+                firstImg: "../content/gfx/brick.png",
+                firstStat: blue.castle,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: blue.fence
+            })
+        }
+    }
+
+
+/*
+    ListModel {
+        id: statsGridModel
+        dynamicRoles: true
+        Component.onCompleted: {
+            //blue stats
+
+            statsGridModel.append ({
+                firstImg: "../content/gfx/brick.png",
+                firstStat: blue.builder,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: blue.bricks
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/weapon.png",
+                firstStat: blue.soldiers,
+                secondImg: "../content/gfx/weapon.png",
+                secondStat: blue.weapons
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/crystal.png",
+                firstStat: blue.sorcerers,
+                secondImg: "../content/gfx/crystal.png",
+                secondStat: blue.crystals
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/brick.png",
+                firstStat: blue.castle,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: blue.fence
+            })
+            //red stats
+
+            statsGridModel.append ({
+                firstImg: "../content/gfx/brick.png",
+                firstStat: red.builder,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: red.bricks
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/weapon.png",
+                firstStat: red.soldiers,
+                secondImg: "../content/gfx/weapon.png",
+                secondStat: red.weapons
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/crystal.png",
+                firstStat: red.sorcerers,
+                secondImg: "../content/gfx/crystal.png",
+                secondStat: red.crystals
+            })
+            statsGridModel.append ({
+                firstImg: "../content/gfx/brick.png",
+                firstStat: red.castle,
+                secondImg: "../content/gfx/brick.png",
+                secondStat: red.fence
+            })
+        }
+    }*/
+
+    ListModel {
+        id: redStatModel
+        dynamicRoles: true
+        Component.onCompleted: {
+
+            redStatModel.append ({
+                baseColor: "#fe7756",
+                borderColor: "#a90101",
+                                        firstImg: "../content/gfx/brick.png",
+                                        firstStat: red.builders,
+                                        secondImg: "../content/gfx/brick.png",
+                                        secondStat: red.bricks
+            })
+            redStatModel.append ({
+                baseColor: "#66ff57",
+                borderColor: "#006600",
+                                        firstImg: "../content/gfx/weapon.png",
+                                        firstStat: red.soldiers,
+                                        secondImg: "../content/gfx/weapon.png",
+                                        secondStat: red.weapons
+            })
+            redStatModel.append ({
+                baseColor: "#02b3fd",
+                borderColor: "#003399",
+                                        firstImg: "../content/gfx/crystal.png",
+                                        firstStat: red.sorcerers,
+                                        secondImg: "../content/gfx/crystal.png",
+                                        secondStat: red.crystals
+            })
+            redStatModel.append ({
+                baseColor: "#666666",
+                borderColor: "#000000",
+                                        firstImg: "../content/gfx/brick.png",
+                                        firstStat: red.castle,
+                                        secondImg: "../content/gfx/brick.png",
+                                        secondStat: red.fence
+            })
+        }
+    }
+
+
+    ListView {
+        width: parent.width
+        height: parent.height
+        boundsBehavior: Flickable.StopAtBounds
+        snapMode: ListView.SnapOneItem
+        orientation: ListView.Horizontal
+
+        model: castleModel
+        delegate:
+
+        Rectangle {
+            height: page.height
+            width: page.width
+            color: "#000000ff"
+
+            Image {
+                id: wall
+                source: "../content/gfx/wall.png"
+                x: wallPosX
+                y: page.height - ground.height - grass.height - 10 * 5
+                visible: true
+            }
+
+            Image {
+                id: castleimg
+                source: castleSource
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: page.height * 0.725
+                fillMode: Image.PreserveAspectFit
+                y: parent.height - ground.height - grass.height - 30 * 5 - 36
+                visible: true
+            }
+
+            Row {
+
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.margins: globalMargins
+                spacing: globalMargins
+                width: page.width
+                height: page.height * 0.10 + globalMargins
+                visible: true
+                Repeater {
+
+                    model: statModel
+                    delegate:
+                    Rectangle {
+                        width: page.width * 0.227
+                        height: page.height * 0.10
+
+                        color: baseColor
+                        border.color: borderColor
+                        border.width: globalMargins
+                        radius: 20
+                        Grid {
+                             anchors.fill: parent
+                             anchors.margins: globalMargins
+                             columns: 2
+                             rows: 2
+
+                             Rectangle {
+                                 width: page.width * 0.227 / 2 - globalMargins
+                                 height: page.height * 0.10 / 2 - globalMargins
+                                 color: "#000000ff"
+                                 Image {
+                                     anchors.centerIn: parent
+                                     height: parent.height * 0.9
+                                     fillMode: Image.PreserveAspectFit
+                                     source: firstImg
+                                 }
+                             }
+
+                             Rectangle {
+                                 width: page.width * 0.227 / 2 - globalMargins
+                                 height: page.height * 0.10 / 2 - globalMargins
+                                 color: "#000000ff"
+                                 Text {
+                                     text: firstStat
+                                     anchors.centerIn: parent
+                                 }
+                             }
+
+                             Rectangle {
+                                 width: page.width * 0.227 / 2 - globalMargins
+                                 height: page.height * 0.10 / 2 - globalMargins
+                                 color: "#000000ff"
+                                 Image {
+                                     anchors.centerIn: parent
+                                     height: parent.height * 0.9
+                                     fillMode: Image.PreserveAspectFit
+                                     source: secondImg
+                                 }
+                             }
+
+                             Rectangle {
+                                 width: page.width * 0.227 / 2 - globalMargins
+                                 height: page.height * 0.10 / 2 - globalMargins
+                                 color: "#000000ff"
+                                 Text {
+                                     text: secondStat
+                                     anchors.centerIn: parent
+                                 }
+                             }
+                        }
+                    }
+                }
             }
         }
     }
 
-    Image {
-        id: wall
-        source: "../content/gfx/wall.png"
-        x: page.width - castleimg.width / 4 + wall.width / 2
-        y: page.height - ground.height - grass.height + game.fence * 5
-        visible: false
-    }
-
-    Image {
-        id: castleimg
-        source: "../content/gfx/castle-blue.png"
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height - ground.height - grass.height - game.castle * 5 - 36
-        visible: false
-    }
-
-    Repeater {
-        model: 4
-        delegate: Image {
-            id: cloud
-            source:"../content/gfx/cloud.png"
-            y: rand(0,150)
-
-            NumberAnimation on x {
-                 id: cloudAnimation
-                 loops: Animation.Infinite
-                 from: -128
-                 to: 668
-                 duration: rand(20000,40000) + rand(0,10000)
-            }
-        }
-    }
 
     Rectangle {
         id: ground
@@ -153,28 +413,6 @@ Page {
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#5fdb50" }
             GradientStop { position: 1.0; color: "#228f1d" }
-        }
-
-        Image {
-            id: deck
-            height: parent.height * 0.85
-            fillMode: Image.PreserveAspectFit
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.horizontalCenter
-            anchors.margins: parent.height * 0.01
-            smooth: true
-            source: "../content/cards/BlueBack.png"
-        }
-
-        Image {
-            id: played
-            height: parent.height * 0.85
-            fillMode: Image.PreserveAspectFit
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.horizontalCenter
-            anchors.margins: parent.height * 0.01
-            smooth: true
-            source: "../content/cards/Dragon.png"
         }
     }
 
@@ -202,282 +440,6 @@ Page {
         }
     }
 
-   Row {
-        id: stats
-        property var statBoxWidth: page.width * 0.227
-        property var statBoxHeight: page.height * 0.10
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.margins: globalMargins
-        visible: false
-
-        spacing: globalMargins
-        
-        Rectangle {
-            id: build
-            width: parent.statBoxWidth
-            height: parent.statBoxHeight
-    
-            color: "#fe7756"
-            border.color: "#a90101"
-            border.width: globalMargins
-            radius: 20
-            
-            Grid {
-                anchors.fill: parent
-                anchors.margins: parent.border.width
-                columns: 2
-                rows: 2
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/brick.png"
-                    }
-                }
-                
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.builders
-                        anchors.centerIn: parent
-                    }
-                }
-            
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/brick.png"
-                    }
-                }
-            
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.bricks
-                        anchors.centerIn: parent
-                    }
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked:
-                    game.buildCastle(5)
-            }
-        }
-    
-        Rectangle {
-            id: attack
-            width: parent.statBoxWidth
-            height: parent.statBoxHeight
-            color: "#66ff57"
-            border.color: "#006600"
-            border.width: globalMargins
-            radius: 20
-
-            Grid {
-                anchors.fill: parent
-                anchors.margins: parent.border.width
-                columns: 2
-                rows: 2
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/weapon.png"
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.soldiers
-                        anchors.centerIn: parent
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/weapon.png"
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.weapons
-                        anchors.centerIn: parent
-                    }
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked:
-                    game.attack(5)
-            }
-        }
-    
-        Rectangle {
-            id: magic
-            width: parent.statBoxWidth
-            height: parent.statBoxHeight
-    
-            color: "#02b3fd"
-            border.color: "#003399"
-            border.width: globalMargins
-            radius: 20
-
-            Grid {
-                anchors.fill: parent
-                anchors.margins: parent.border.width
-                columns: 2
-                rows: 2
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/crystal.png"
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.sorcerers
-                        anchors.centerIn: parent
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/crystal.png"
-                    }
-                }
-
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        text: game.crystals
-                        anchors.centerIn: parent
-                    }
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked:
-                    game.buildWall(-5)
-            }
-        }
-    
-        Rectangle {
-            id: health
-            width: parent.statBoxWidth
-            height: parent.statBoxHeight
-    
-            color: "#666666"
-            border.color: "#000000"
-            border.width: globalMargins
-            radius: 20
-            Grid {
-                anchors.fill: parent
-                anchors.margins: parent.border.width
-                columns: 2
-                rows: 2
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/crystal.png"
-                    }
-                }
-    
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        anchors.centerIn: parent
-                        text: game.castle
-                    }
-                }
-    
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Image {
-                        anchors.centerIn: parent
-                        height: parent.height * 0.9
-                        fillMode: Image.PreserveAspectFit
-                        source: "../content/gfx/crystal.png"
-                    }
-                }
-    
-                Rectangle {
-                    width: parent.width / parent.columns
-                    height: parent.height / parent.rows
-                    color: "#000000ff"
-                    Text {
-                        anchors.centerIn: parent
-                        text: game.wall
-                    }
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked:
-                    game.buildWall(+1)
-            }
-        }
-    }
-
     Rectangle {
         id: menuButton
         width: 75
@@ -495,40 +457,22 @@ Page {
         MouseArea {
             anchors.fill: parent
             onClicked:
-                action.toggleMenu()
+                game.toggleMenu()
         }
 
-        Rectangle {
-            id: line1
-            width: parent.width - 40
-            height: 5
-            anchors.top: parent.top
-            anchors.topMargin: 20
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            color: "#ffffff"
-        }
-
-        Rectangle {
-            id: line2
-            width: parent.width - 40
-            height: 5
-            anchors.top: line1.bottom
-            anchors.topMargin: globalMargins
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            color: "#ffffff"
-        }
-
-        Rectangle {
-            id: line3
-            width: parent.width - 40
-            height: 5
-            anchors.top: line2.bottom
-            anchors.topMargin: globalMargins
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            color: "#ffffff"
+        Column {
+            anchors.fill: parent
+            anchors.margins: globalMargins*2
+            spacing: 10
+            Repeater {
+            model: 3
+            delegate:
+                Rectangle {
+                    width: parent.width
+                    height: 5
+                    color: "#ffffff"
+                }
+            }
         }
     }
 
@@ -577,7 +521,7 @@ Page {
                 MouseArea {
                     anchors.fill: parent
                     onClicked:
-                        action.startGame()
+                        game.startGame()
                     onPressed:
                         newgameButton.color = "white"
                     onReleased:
@@ -596,55 +540,67 @@ Page {
 
 
     QtObject {
+        id: blue
+        property int builders: 2
+        property int bricks: 5
+        property int soldiers: 2
+        property int weapons: 5
+        property int sorcerers: 2
+        property int crystals: 5
+        property int castle: 30
+        property int fence: 10
+    }
+
+    QtObject {
+        id: red
+        property int builders: 2
+        property int bricks: 5
+        property int soldiers: 2
+        property int weapons: 5
+        property int sorcerers: 2
+        property int crystals: 5
+        property int castle: 30
+        property int fence: 10
+    }
+
+    QtObject {
         id: game
-        property int builders
-        property int bricks
-        property int soldiers
-        property int weapons
-        property int sorcerers
-        property int crystals
-        property int castle
-        property int wall
 
-        function getBuilders() {
-            return builders;
-        }
+        function attack(player, attack) {
 
-        function attack(attack) {
-
-            if ((game.fence - attack) > 0) {
-                game.fence -= attack
+            if ((player.fence - attack) > 0) {
+                player.fence -= attack
                 wall.y += attack * 5
-            } else if ((game.fence - attack) <= 0) {
-                var nextAttack = attack - game.fence
-                game.fence = 0
-                game.castle -= nextAttack
-                wall.y = page.height - ground.height - grass.height + game.fence * 5
+            } else if ((player.fence - attack) <= 0) {
+                var nextAttack = attack - player.fence
+                player.fence = 0
+                player.castle -= nextAttack
+                wall.y = page.height - ground.height - grass.height + player.fence * 5
                 castleimg.y += nextAttack * 5
-                if (game.castle <= 0) {
-                    action.endGame()
+                if (player.castle <= 0) {
+                    endGame()
                 }
             }
 
             else {
-                game.fence -= attack
+                player.fence -= attack
                 wall.y += attack * 5
                 castleimg.y += attack * 5
             }
         }
 
         function buildCastle(build) {
-            game.castle += build
+            player.castle += build
 
-            if (game.castle >= 100) {
-                action.endGame()
+            if (player.castle >= 100) {
+                endGame()
             }
             castleimg.y -= build * 5
         }
 
         function buildWall(build) {
-            if (game.fence < 200) {
-                game.fence += build
+            if (player.fence < 200) {
+                player.fence += build
                 wall.y -= build * 5
             }
         }
@@ -660,24 +616,31 @@ Page {
         function sorcerer() {
 
         }
-    }
-
-    QtObject {
-        id: action
 
         function startGame() {
             page.state = "gameOn"
-            game.builders = 2
-            game.bricks = 5
-            game.soldiers = 2
-            game.weapons = 5
-            game.sorcerers = 2
-            game.crystals = 5
-            game.castle = 30
-            game.fence = 10
+            blue.builders = 2
+            blue.bricks = 5
+            blue.soldiers = 2
+            blue.weapons = 5
+            blue.sorcerers = 2
+            blue.crystals = 5
+            blue.castle = 30
+            blue.fence = 10
 
-            castleimg.y = page.height - ground.height - grass.height - game.castle * 5 - 36
-            wall.y = page.height - ground.height - grass.height - game.fence * 5
+            red.builders = 2
+            red.bricks = 5
+            red.soldiers = 2
+            red.weapons = 5
+            red.sorcerers = 2
+            red.crystals = 5
+            red.castle = 30
+            red.fence = 10
+
+            castleimg.y = page.height - ground.height - grass.height - blue.castle * 5 - 36
+            wall.y = page.height - ground.height - grass.height - blue.fence * 5
+            castleimg2.y = page.height - ground.height - grass.height - red.castle * 5 - 36
+            wall2.y = page.height - ground.height - grass.height - red.fence * 5
         }
 
         function endGame() {
@@ -685,6 +648,13 @@ Page {
         }
 
         function turn() {
+            blue.bricks += blue.builders
+            blue.weapons += blue.soldiers
+            blue.crystals += blue.sorcerers
+
+            red.bricks += red.builders
+            red.weapons += red.soldiers
+            red.crystals += red.sorcerers
         }
 
         function toggleMenu() {
