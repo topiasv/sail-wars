@@ -60,9 +60,7 @@ Page {
     states: [
         State {
             name: "gameOn"
-            PropertyChanges { target: castleimg; y: 480; visible: true }
-            PropertyChanges { target: wall; visible: true }
-            PropertyChanges { target: stats; visible: true }
+            PropertyChanges { target: gameView; visible: true }
             PropertyChanges { target: menu; visible: false }
             PropertyChanges { target: title; visible: false }
             StateChangeScript { script: console.log("state = gameOn") }
@@ -70,9 +68,7 @@ Page {
 
         State {
             name: "gameOver"
-            PropertyChanges { target: castleimg; visible: false }
-            PropertyChanges { target: wall; visible: false }
-            PropertyChanges { target: stats; visible: false }
+            PropertyChanges { target: gameView; visible: false }
             PropertyChanges { target: menu; visible: true }
             PropertyChanges { target: title; visible: true }
             StateChangeScript { script: console.log("state = gameOver") }
@@ -84,7 +80,10 @@ Page {
 
     Rectangle {
         id: sky
-        anchors.fill: parent
+        anchors.bottom: grass.top
+        anchors.top: page.top
+        anchors.left: page.left
+        anchors.right: page.right
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#3382cb" }
             GradientStop { position: 1.0; color: "#55b6ec" }
@@ -107,8 +106,8 @@ Page {
         anchors.bottom: ground.top
         width: parent.width
         height: parent.height * 0.01
-        z: 1000
         color: "#006600"
+        z: 1000
     }
 
     /*************PLAYER GRAPHICS************/
@@ -120,7 +119,10 @@ Page {
         dynamicRoles: true
         Component.onCompleted: {
             castleModel.append({castleSource: "../content/gfx/castle-blue.png",
-                                wallPosX: page.width * 0.875,
+                                castleY: blue.castle,
+                                wallY: blue.fence,
+                                wallX: page.width * 0.875,
+                                turnStatus: true,
                                 statModel: blueStatModel,
                                 player: blue.name,
                                 cloudRotation: 0,
@@ -132,7 +134,10 @@ Page {
                                 lastPlayed: blue.lastPlayed
             })
             castleModel.append({castleSource: "../content/gfx/castle-red.png",
-                                wallPosX: page.width * 0.125,
+                                castleY: red.castle,
+                                wallY: red.fence,
+                                wallX: page.width * 0.125,
+                                turnStatus: false,
                                 statModel: redStatModel,
                                 player: red.name,
                                 cloudRotation: 1,
@@ -154,34 +159,38 @@ Page {
             blueStatModel.append ({
                 baseColor: "#fe7756",
                 borderColor: "#a90101",
+                //testFunction: game.buildWall(blue, 5),
                 firstImg: "../content/gfx/brick.png",
                 firstStat: blue.builders,
                 secondImg: "../content/gfx/brick.png",
-                secondStat: blue.bricks
+                secondStat: blue.bricks,
             })
             blueStatModel.append ({
                 baseColor: "#66ff57",
                 borderColor: "#006600",
+                //testFunction: game.attack(red, 5),
                 firstImg: "../content/gfx/weapon.png",
                 firstStat: blue.soldiers,
                 secondImg: "../content/gfx/weapon.png",
-                secondStat: blue.weapons
+                secondStat: blue.weapons,
             })
             blueStatModel.append ({
                 baseColor: "#02b3fd",
                 borderColor: "#003399",
+                //testFunction: game.buildCastle(blue, 5),
                 firstImg: "../content/gfx/crystal.png",
                 firstStat: blue.sorcerers,
                 secondImg: "../content/gfx/crystal.png",
-                secondStat: blue.crystals
+                secondStat: blue.crystals,
             })
             blueStatModel.append ({
                 baseColor: "#666666",
                 borderColor: "#000000",
+                //testFunction: game.build(blue, 20),
                 firstImg: "../content/gfx/brick.png",
                 firstStat: blue.castle,
                 secondImg: "../content/gfx/brick.png",
-                secondStat: blue.fence
+                secondStat: blue.fence,
             })
         }
     }
@@ -197,7 +206,7 @@ Page {
                 firstImg: "../content/gfx/brick.png",
                 firstStat: red.builders,
                 secondImg: "../content/gfx/brick.png",
-                secondStat: red.bricks
+                secondStat: red.bricks,
             })
             redStatModel.append ({
                 baseColor: "#66ff57",
@@ -205,7 +214,7 @@ Page {
                 firstImg: "../content/gfx/weapon.png",
                 firstStat: red.soldiers,
                 secondImg: "../content/gfx/weapon.png",
-                secondStat: red.weapons
+                secondStat: red.weapons,
             })
             redStatModel.append ({
                 baseColor: "#02b3fd",
@@ -213,7 +222,7 @@ Page {
                 firstImg: "../content/gfx/crystal.png",
                 firstStat: red.sorcerers,
                 secondImg: "../content/gfx/crystal.png",
-                secondStat: red.crystals
+                secondStat: red.crystals,
             })
             redStatModel.append ({
                 baseColor: "#666666",
@@ -221,7 +230,7 @@ Page {
                 firstImg: "../content/gfx/brick.png",
                 firstStat: red.castle,
                 secondImg: "../content/gfx/brick.png",
-                secondStat: red.fence
+                secondStat: red.fence,
             })
         }
     }
@@ -229,12 +238,13 @@ Page {
     /******************VIEWS*****************/
 
     ListView {
+        id: gameView
         width: parent.width
         height: parent.height
         boundsBehavior: Flickable.StopAtBounds
         snapMode: ListView.SnapOneItem
         orientation: ListView.Horizontal
-
+        visible: false
         model: castleModel
         delegate:
 
@@ -244,22 +254,20 @@ Page {
             color: "#000000ff"
 
             Image {
-                id: wall
-                source: "../content/gfx/wall.png"
-                x: wallPosX
-                y: page.height - ground.height - grass.height - 10 * 5
-                visible: true
-            }
-
-            Image {
                 id: castleimg
                 source: castleSource
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: page.height * 0.725
                 fillMode: Image.PreserveAspectFit
-                y: parent.height - ground.height - grass.height - 100 * 5 - 36 // 30 * 5
+                y: page.height - ground.height - grass.height - castleY * 5 - 36
                 z: 100
-                visible: true
+            }
+
+            Image {
+                id: wall
+                source: "../content/gfx/wall.png"
+                x: wallX
+                y: page.height - ground.height - grass.height - wallY * 5
             }
 
 
@@ -301,6 +309,15 @@ Page {
                     anchors.margins: parent.height * 0.01
                     smooth: true
                     source: deckPic
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked:{
+                            if (cardMenu.visible == false)
+                                cardMenu.visible = true
+                            else
+                                cardMenu.visible = false
+                        }
+                    }
                 }
 
                 Image {
@@ -322,6 +339,7 @@ Page {
                 height: parent.height * 0.005
                 y: nameShadow.height - page.height * 0.005
                 anchors.horizontalCenter: parent.horizontalCenter
+                visible: turnStatus
             }
 
             Text {
@@ -415,6 +433,158 @@ Page {
                                 }
                             }
                         }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked:
+                                console.log("Hi!")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /***************CARD MENU****************/
+
+    ListModel {
+        id: cardsModel
+        dynamicRoles: true
+        Component.onCompleted: {
+            //Build
+            cardsModel.append({card: "../content/cards/Build/Base.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Wall.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Defence.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Reserve.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Tower.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/School.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Wain.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Fence.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Fort.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Build/Babylon.png"
+
+                              })
+            //Weapons
+
+            cardsModel.append({card: "../content/cards/Weapons/Archer.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Knight.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Rider.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Platoon.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Recruit.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Attack.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Saboteur.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Thief.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Swat.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Weapons/Banshee.png"
+
+                              })
+
+            //Magic
+
+            cardsModel.append({card: "../content/cards/Magic/Conjurebricks.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Conjurecrystals.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Conjureweapons.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Crushbricks.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Crushcrystals.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Crushweapons.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Sorcerer.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Dragon.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Pixies.png"
+
+                              })
+            cardsModel.append({card: "../content/cards/Magic/Curse.png"
+
+                              })
+        }
+    }
+
+    Rectangle {
+        id: cardMenu
+        visible: false
+        anchors.fill: sky
+        anchors.margins: globalMargins
+        color: "#d8a26b"
+        border.color: "#cc8c38"
+        border.width: globalMargins
+        radius: 20
+        z: 10000
+
+        GridView {
+            id: cardsView
+            anchors.fill: cardMenu
+            anchors.margins: globalMargins
+            clip: true
+
+            cellWidth: width / 5
+            cellHeight: height / 4
+
+            model: cardsModel
+            delegate:
+            Item {
+                width: cardsView.cellWidth
+                height: cardsView.cellHeight
+                Image {
+                    id: cardItem
+                    height: parent.height - globalMargins * 2
+                    anchors.centerIn: parent
+                    anchors.margins: globalMargins
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    source: card
+
+                    MouseArea {
+
                     }
                 }
             }
@@ -447,6 +617,7 @@ Page {
         anchors.rightMargin: globalMargins
         anchors.bottom: parent.bottom
         anchors.bottomMargin: globalMargins
+        z: 100000
 
         color: "#d8a26b"
         border.color: "#cc8c38"
@@ -475,17 +646,37 @@ Page {
         }
     }
 
+    ListModel {
+        id: menuButtonsModel
+        dynamicRoles: true
+        Component.onCompleted: {
+            menuButtonsModel.append({label: "New Game",
+                                     action: game.startGame()
+            })
+            menuButtonsModel.append({label: "Cards",
+                                        action: function showCards() {
+                                            if (cardMenu.visible == false)
+                                                cardMenu.visible = true
+                                            else
+                                                cardMenu.visible = false
+                                        }
+            })
+        }
+
+    }
+
     Rectangle {
         id: menu
 
-        width: 300
-        height: 300
+        height: page.height * 0.32
+        width: height
         color: "#d8a26b"
         border.color: "#cc8c38"
         border.width: globalMargins
         radius: 20
         anchors.centerIn: parent
         visible: true
+        z: 100000
 
         NumberAnimation on opacity {
             id: menuAnimation
@@ -494,24 +685,26 @@ Page {
             duration: 3000
         }
 
-            Text {
-                id: menuTitle
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: 15
-                text: "Menu"
-                font.pointSize: 32
-                font.family: secondaryFont.name
-            }
+        Text {
+            id: menuTitle
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 15
+            text: "Menu"
+            font.pointSize: 32
+            font.family: secondaryFont.name
+        }
 
+        Column {
+            id: buttonsContainer
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: menuTitle.bottom
+            anchors.bottom: menu.bottom
+            anchors.margins: globalMargins
+            spacing: globalMargins
             Rectangle {
-                id: newgameButton
-                width: parent.width - 60
-                height: parent.height/5
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: menuTitle.bottom
-                anchors.topMargin: globalMargins
-                anchors.leftMargin: 30
+                width: menu.width - 60
+                height: menu.height/5
                 color: "#cc8c38"
                 border.width: globalMargins
                 border.color: "#cc8c38"
@@ -522,9 +715,9 @@ Page {
                     onClicked:
                         game.startGame()
                     onPressed:
-                        newgameButton.color = "white"
+                        parent.color = "white"
                     onReleased:
-                        newgameButton.color = "#cc8c38"
+                        parent.color = "#cc8c38"
                 }
 
                 Text {
@@ -535,7 +728,168 @@ Page {
                 }
             }
 
-    }
+            Rectangle {
+                width: menu.width - 60
+                height: menu.height/5
+                color: "#cc8c38"
+                border.width: globalMargins
+                border.color: "#cc8c38"
+                radius: 20
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        game.attack(blue,5)
+                    }
+                    onPressed:
+                        parent.color = "white"
+                    onReleased:
+                        parent.color = "#cc8c38"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Attack"
+                    font.pointSize: 28
+                    font.family: secondaryFont.name
+                }
+            }
+
+            Rectangle {
+                width: menu.width - 60
+                height: menu.height/5
+                color: "#cc8c38"
+                border.width: globalMargins
+                border.color: "#cc8c38"
+                radius: 20
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        game.changeTurn()
+                    }
+                    onPressed:
+                        parent.color = "white"
+                    onReleased:
+                        parent.color = "#cc8c38"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Turn"
+                    font.pointSize: 28
+                    font.family: secondaryFont.name
+                }
+            }
+        }
+    }/*
+            Rectangle {
+                id: newgameButton
+                width: parent.width - 60
+                height: parent.height/5
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: newgameButton.bottom
+                anchors.topMargin: globalMargins
+                anchors.leftMargin: 30
+                color: "#cc8c38"
+                border.width: globalMargins
+                border.color: "#cc8c38"
+                radius: 20
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked:
+                        if (cardMenu.visible == false)
+                            cardMenu.visible = true
+                        else
+                            cardMenu.visible = false
+                    onPressed:
+                        cardButton.color = "white"
+                    onReleased:
+                        cardButton.color = "#cc8c38"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Cards"
+                    font.pointSize: 28
+                    font.family: secondaryFont.name
+                }
+            }
+
+            Rectangle {
+                id: cardButton
+                width: parent.width - 60
+                height: parent.height/5
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: newgameButton.bottom
+                anchors.topMargin: globalMargins
+                anchors.leftMargin: 30
+                color: "#cc8c38"
+                border.width: globalMargins
+                border.color: "#cc8c38"
+                radius: 20
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked:
+                        if (cardMenu.visible == false)
+                            cardMenu.visible = true
+                        else
+                            cardMenu.visible = false
+                    onPressed:
+                        cardButton.color = "white"
+                    onReleased:
+                        cardButton.color = "#cc8c38"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Cards"
+                    font.pointSize: 28
+                    font.family: secondaryFont.name
+
+                }
+            }
+        }
+*/
+/*        Column {
+            id: buttonsContainer
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: menuTitle.bottom
+            anchors.bottom: menu.bottom
+            anchors.margins: globalMargins
+            spacing: globalMargins
+            Repeater {
+                model: menuButtonsModel
+                delegate:
+                Rectangle {
+                    width: menu.width - 60
+                    height: menu.height/5
+                    color: "#cc8c38"
+                    border.width: globalMargins
+                    border.color: "#cc8c38"
+                    radius: 20
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked:
+                            action
+                        onPressed:
+                            parent.color = "white"
+                        onReleased:
+                            parent.color = "#cc8c38"
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: label
+                        font.pointSize: 28
+                        font.family: secondaryFont.name
+                    }
+                }
+            }
+        }*/
 
 
     /*********GAME DATA & FUNCTIONS**********/
@@ -543,7 +897,7 @@ Page {
     QtObject {
         id: blue
         property string name: "Blue"
-        property string lastPlayed: "../content/cards/Dragon.png"
+        property string lastPlayed: "../content/cards/Magic/Dragon.png"
 
         property int builders: 2
         property int bricks: 5
@@ -558,7 +912,7 @@ Page {
     QtObject {
         id: red
         property string name: "Red"
-        property string lastPlayed: "../content/cards/Banshee.png"
+        property string lastPlayed: "../content/cards/Weapons/Banshee.png"
 
         property int builders: 2
         property int bricks: 5
@@ -573,95 +927,156 @@ Page {
     QtObject {
         id: game
 
+        property string turn: "blue"
+
         function attack(player, attack) {
 
             if ((player.fence - attack) > 0) {
                 player.fence -= attack
-                wall.y += attack * 5
+                if (player === "red") {
+                    redStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(1,"wallY",player.fence)
+                }
+                else {
+                    blueStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(0,"wallY",player.fence)
+                }
             } else if ((player.fence - attack) <= 0) {
                 var nextAttack = attack - player.fence
                 player.fence = 0
                 player.castle -= nextAttack
-                wall.y = page.height - ground.height - grass.height + player.fence * 5
-                castleimg.y += nextAttack * 5
+                if (player === "red") {
+                    redStatModel.setProperty(3,"firstStat",player.castle)
+                    redStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(1,"castleY",player.castle)
+                    castleModel.setProperty(1,"wallY",player.fence)
+                }
+                else {
+                    blueStatModel.setProperty(3,"firstStat",player.castle)
+                    blueStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(0,"castleY",player.castle)
+                    castleModel.setProperty(0,"wallY",player.fence)
+                }
                 if (player.castle <= 0) {
                     endGame()
                 }
-            }
-
-            else {
-                player.fence -= attack
-                wall.y += attack * 5
-                castleimg.y += attack * 5
+            } else {
+                player.castle -= attack
+                if (player === "red") {
+                    redStatModel.setProperty(3,"firstStat",player.castle)
+                    castleModel.setProperty(1,"castleY",player.castle)
+                }
+                else {
+                    blueStatModel.setProperty(3,"firstStat",player.castle)
+                    castleModel.setProperty(0,"castleY",player.castle)
+                }
             }
         }
 
-        function buildCastle(build) {
+        function buildCastle(player, build) {
             player.castle += build
-
+            if (player === "red") {
+                redStatModel.setProperty(3,"firstStat",player.castle)
+                castleModel.setProperty(1,"castleY",player.castle)
+            }
+            else {
+                blueStatModel.setProperty(3,"firstStat",player.castle)
+                castleModel.setProperty(0,"castleY",player.castle)
+            }
             if (player.castle >= 100) {
                 endGame()
             }
-            castleimg.y -= build * 5
         }
 
-        function buildWall(build) {
+        function buildWall(player, build) {
             if (player.fence < 200) {
                 player.fence += build
-                wall.y -= build * 5
+                if (player === "red") {
+                    redStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(1,"wallY",player.fence)
+                }
+                else {
+                    blueStatModel.setProperty(3,"secondStat",player.fence)
+                    castleModel.setProperty(0,"wallY",player.fence)
+                }
             }
         }
 
-        function recruit() {
-
+        function school(player) {
+            player.builders += 1
+            console.log(player.builders)
+            if (player === "red")
+                redStatModel.setProperty(0,"firstStat",player.soldiers)
+            else
+                blueStatModel.setProperty(0,"firstStat",player.soldiers)
         }
 
-        function school() {
-
+        function recruit(player) {
+            player.soldiers += 1
+            console.log(player.soldiers)
+            if (player === "red")
+                redStatModel.setProperty(1,"firstStat",player.soldiers)
+            else
+                blueStatModel.setProperty(1,"firstStat",player.soldiers)
         }
 
-        function sorcerer() {
-
+        function sorcerer(player) {
+            player.sorcerers += 1
+            console.log(player.sorcerers)
+            if (player === "red")
+                redStatModel.setProperty(2,"firstStat",player.soldiers)
+            else
+                blueStatModel.setProperty(2,"firstStat",player.soldiers)
         }
 
         function startGame() {
+            resetStats(blue)
+            resetStats(red)
+
+            castleModel.setProperty(0,"castleY",blue.castle)
+            castleModel.setProperty(0,"wallY",blue.fence)
+            blueStatModel.setProperty(3,"firstStat",blue.castle)
+            blueStatModel.setProperty(3,"secondStat",blue.fence)
+
+            castleModel.setProperty(1,"castleY",red.castle)
+            castleModel.setProperty(1,"wallY",red.fence)
+            redStatModel.setProperty(3,"firstStat",red.castle)
+            redStatModel.setProperty(3,"secondStat",red.fence)
             page.state = "gameOn"
-            blue.builders = 2
-            blue.bricks = 5
-            blue.soldiers = 2
-            blue.weapons = 5
-            blue.sorcerers = 2
-            blue.crystals = 5
-            blue.castle = 30
-            blue.fence = 10
-
-            red.builders = 2
-            red.bricks = 5
-            red.soldiers = 2
-            red.weapons = 5
-            red.sorcerers = 2
-            red.crystals = 5
-            red.castle = 30
-            red.fence = 10
-
-            castleimg.y = page.height - ground.height - grass.height - blue.castle * 5 - 36
-            wall.y = page.height - ground.height - grass.height - blue.fence * 5
-            castleimg2.y = page.height - ground.height - grass.height - red.castle * 5 - 36
-            wall2.y = page.height - ground.height - grass.height - red.fence * 5
         }
 
         function endGame() {
             page.state = "gameOver"
         }
 
-        function turn() {
+        function changeTurn() {
+            if (turn === "blue") {
+                turn = "red"
+                castleModel.setProperty(0,"turnStatus",false)
+                castleModel.setProperty(1,"turnStatus",true)
+                gameView.positionViewAtIndex(1, ListView.SnapPosition)
+            } else {
+                turn = "blue"
+                castleModel.setProperty(1,"turnStatus",false)
+                castleModel.setProperty(0,"turnStatus",true)
+                gameView.positionViewAtIndex(0, ListView.SnapPosition)
+            }
+
             blue.bricks += blue.builders
             blue.weapons += blue.soldiers
             blue.crystals += blue.sorcerers
 
+            blueStatModel.setProperty(0,"secondStat",blue.bricks)
+            blueStatModel.setProperty(1,"secondStat",blue.weapons)
+            blueStatModel.setProperty(2,"secondStat",blue.crystals)
+
             red.bricks += red.builders
             red.weapons += red.soldiers
             red.crystals += red.sorcerers
+
+            redStatModel.setProperty(0,"secondStat",red.bricks)
+            redStatModel.setProperty(1,"secondStat",red.weapons)
+            redStatModel.setProperty(2,"secondStat",red.crystals)
         }
 
         function toggleMenu() {
@@ -669,6 +1084,17 @@ Page {
                 menu.visible = false
             else
                 menu.visible = true
+        }
+
+        function resetStats(player) {
+            player.builders = 2
+            player.bricks = 5
+            player.soldiers = 2
+            player.weapons = 5
+            player.sorcerers = 2
+            player.crystals = 5
+            player.castle = 30
+            player.fence = 10
         }
     }
 }
